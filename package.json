@@ -1,0 +1,34 @@
+{
+  "name": "weathertest-back",
+  "version": "1.0.0",
+  "description": "Backend for weather project",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "eslint src --ext js,jsx --report-unused-disable-directives --max-warnings 0",
+    "start": "node app.js",
+    "dev": "nodemon app.js"
+  },
+  "author": "Cristhian Leal",
+  "license": "MIT",
+  "type": "module",
+  "dependencies": {
+    "axios": "^1.4.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "mongoose": "^7.4.3"
+  },
+  "devDependencies": {
+    "eslint": "^8.47.0",
+    "eslint-config-standard": "^17.1.0",
+    "eslint-plugin-import": "^2.28.0",
+    "eslint-plugin-n": "^16.0.1",
+    "eslint-plugin-promise": "^6.1.1",
+    "eslint-plugin-react": "^7.33.2",
+    "nodemon": "^3.0.1"
+  },
+  "eslintconfig": {
+    "extends": "./node_modules/standard/eslintrc.json"
+  }
+}
