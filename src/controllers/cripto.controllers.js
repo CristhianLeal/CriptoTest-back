@@ -3,7 +3,7 @@ import { CovalentApi } from '../api/covalentApi.js'
 
 export const getCripto = async (req, res) => {
   try {
-    const response = await CovalentApi.get('/pricing/historical_by_addresses_v2/eth-mainnet/USD/0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee/?from=2023-08-08&to=2023-08-18')
+    const response = await CovalentApi.get('/pricing/historical_by_addresses_v2/eth-mainnet/USD/0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee/?from=2023-08-08&to=2023-08-18',{headers:{'Authorization': `${process.env.API_KEY}`}})
     const cryptoData = response.data
     const newCryptoData = new CryptoData({
       contractName: cryptoData.data[0].contract_name,
