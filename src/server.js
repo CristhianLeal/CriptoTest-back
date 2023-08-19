@@ -1,5 +1,5 @@
 import express from 'express'
-import { weatherRoutes } from './routes/index.js'
+import { CriptoRoutes } from './routes/index.js'
 import cors from 'cors'
 import { dbConnection } from './db/config.js'
 
@@ -21,7 +21,7 @@ export class Server {
   }
 
   routes () {
-    this.app.use('/', weatherRoutes)
+    this.app.use('/', CriptoRoutes)
   }
 
   listen () {

@@ -1,1 +1,1 @@
-export { default as weatherRoutes } from './weather.routes.js'
+export { default as CriptoRoutes } from './cripto.routes.js'
