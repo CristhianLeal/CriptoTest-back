@@ -20,7 +20,9 @@ export const getCripto = async (req, res) => {
       ) {
         res.json(existingCryptoData)
       }else {
-        const response = await CovalentApi.get('/pricing/historical_by_addresses_v2/eth-mainnet/USD/0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee/?from=2023-08-08&to=2023-08-18',{headers:{'Authorization': `${process.env.API_KEY}`}})
+        const from = '2023-08-01'
+        const to = '2023-08-20'
+        const response = await CovalentApi.get(`/pricing/historical_by_addresses_v2/eth-mainnet/USD/0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee/?from=${from}&to=${to}`,{headers:{'Authorization': `${process.env.API_KEY}`}})
         const cryptoData = response.data
         const newCryptoData = new CryptoData({
           contractName: cryptoData.data[0].contract_name,
@@ -35,7 +37,9 @@ export const getCripto = async (req, res) => {
         res.json(newCryptoData)
       }
     } else {
-      const response = await CovalentApi.get('/pricing/historical_by_addresses_v2/eth-mainnet/USD/0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee/?from=2023-08-08&to=2023-08-18',{headers:{'Authorization': `${process.env.API_KEY}`}})
+      const from = '2023-08-01'
+      const to = '2023-08-20'
+      const response = await CovalentApi.get(`/pricing/historical_by_addresses_v2/eth-mainnet/USD/0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee/?from=${from}&to=${to}`,{headers:{'Authorization': `${process.env.API_KEY}`}})
       const cryptoData = response.data
       const newCryptoData = new CryptoData({
         contractName: cryptoData.data[0].contract_name,
