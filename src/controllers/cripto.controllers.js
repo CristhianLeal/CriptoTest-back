@@ -3,26 +3,27 @@ import { CovalentApi } from '../api/covalentApi.js'
 
 export const getCripto = async (req, res) => {
   try {
-    const existingCryptoData = await CryptoData.findOne({ contractName:'Ether'})
+    const requestData = req.body
+    console.log('pedido')
+    let contractName = ''
+    let ContactAdress = ''
+    if (requestData.cripto === 'eth-mainnet') {
+      contractName = 'Ether'
+      ContactAdress = '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee'
+    }
+    if (requestData.cripto === 'matic-mainnet') {
+      contractName = 'Matic Token'
+      ContactAdress = '0x7D1AfA7B718fb893dB30A3aBc0Cfc608AaCfeBB0'
+    }
+    const existingCryptoData = await CryptoData.findOne({ contractName: `${contractName}` })
+    const CreatedDate = existingCryptoData?.createdAt
     if (existingCryptoData) {
-      const today = new Date();
-      const existingDate = existingCryptoData.createdAt
-      const todayYear = today.getFullYear();
-      const todayMonth = today.getMonth();
-      const todayDay = today.getDate();
-      const existingYear = existingDate.getFullYear();
-      const existingMonth = existingDate.getMonth();
-      const existingDay = existingDate.getDate();
-      if (
-        todayYear === existingYear &&
-        todayMonth === existingMonth &&
-        todayDay === existingDay
-      ) {
+      const today = new Date()
+      if (CreatedDate.toISOString().split('T')[0] === today.toISOString().split('T')[0]) {
         res.json(existingCryptoData)
-      }else {
-        const from = '2023-08-01'
-        const to = '2023-08-20'
-        const response = await CovalentApi.get(`/pricing/historical_by_addresses_v2/eth-mainnet/USD/0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee/?from=${from}&to=${to}`,{headers:{'Authorization': `${process.env.API_KEY}`}})
+      } else {
+        await CryptoData.findByIdAndDelete(existingCryptoData._id)
+        const response = await CovalentApi.get(`/pricing/historical_by_addresses_v2/${requestData.cripto}/${requestData.money}/${ContactAdress}/?from=${requestData.dateFrom}&to=${requestData.dateTo}`, { headers: { Authorization: `${process.env.API_KEY}` } })
         const cryptoData = response.data
         const newCryptoData = new CryptoData({
           contractName: cryptoData.data[0].contract_name,
@@ -37,9 +38,7 @@ export const getCripto = async (req, res) => {
         res.json(newCryptoData)
       }
     } else {
-      const from = '2023-08-01'
-      const to = '2023-08-20'
-      const response = await CovalentApi.get(`/pricing/historical_by_addresses_v2/eth-mainnet/USD/0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee/?from=${from}&to=${to}`,{headers:{'Authorization': `${process.env.API_KEY}`}})
+      const response = await CovalentApi.get(`/pricing/historical_by_addresses_v2/${requestData.cripto}/${requestData.money}/${ContactAdress}/?from=${requestData.dateFrom}&to=${requestData.dateTo}`, { headers: { Authorization: `${process.env.API_KEY}` } })
       const cryptoData = response.data
       const newCryptoData = new CryptoData({
         contractName: cryptoData.data[0].contract_name,
@@ -55,6 +54,11 @@ export const getCripto = async (req, res) => {
     }
   } catch (error) {
     console.log(error)
-    res.status(500).json({ message: 'problema al guardar los datos',})
+    res.status(500).json({ message: 'problema al guardar los datos' })
   }
+}
+export const getInfoCripto = async (req, res) => {
+  const cripto = req.params
+  const existingCryptoData = await CryptoData.findOne({ contractName: `${cripto.cripto}` })
+  res.json(existingCryptoData)
 }

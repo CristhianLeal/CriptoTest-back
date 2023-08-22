@@ -1,8 +1,9 @@
 import { Router } from 'express'
-import { getCripto } from '../controllers/cripto.controllers.js'
+import { getCripto, getInfoCripto } from '../controllers/cripto.controllers.js'
 
 const router = Router()
 
-router.get('/', getCripto)
+router.post('/', getCripto)
+router.get('/:cripto', getInfoCripto)
 
 export default router
