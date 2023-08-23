@@ -21,7 +21,6 @@ export const getCripto = async (req, res) => {
       if (requestData.dateFrom > minDateStorage && requestData.dateTo < maxDateStorage) {
         res.json(existingCryptoData)
       } else {
-        await CryptoData.findByIdAndDelete(existingCryptoData._id)
         const response = await CovalentApi.get(`/pricing/historical_by_addresses_v2/${requestData.cripto}/${requestData.quoteCurrency}/${ContactAdress}/?from=${requestData.dateFrom}&to=${requestData.dateTo}`, { headers: { Authorization: `${process.env.API_KEY}` } })
         const cryptoData = response.data
         const newCryptoData = new CryptoData({
@@ -33,7 +32,15 @@ export const getCripto = async (req, res) => {
             date: price.date
           }))
         })
-        await newCryptoData.save()
+        const newPrices = cryptoData.data[0].prices.map(price => ({
+          price: price.price,
+          date: price.date
+        }))
+        try {
+          await CryptoData.findByIdAndUpdate(existingCryptoData._id, { $set: { prices: newPrices } }, { new: true })
+        } catch (error) {
+          return res.status(500).json({ message: 'problema al actualizar los datos' })
+        }
         res.json(newCryptoData)
       }
     } else {
@@ -59,6 +66,6 @@ export const getCripto = async (req, res) => {
 export const getInfoCripto = async (req, res) => {
   const cripto = req.params.cripto
   const quoteCurrency = req.params.quoteCurrency
-  const existingCryptoData = await CryptoData.findOne({ contractName: `${cripto}`, quoteCurrency: `${quoteCurrency}` })
-  res.json(existingCryptoData)
+  const dataFound = await CryptoData.findOne({ contractName: `${cripto}`, quoteCurrency: `${quoteCurrency}` })
+  res.json(dataFound)
 }
