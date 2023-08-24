@@ -1,60 +1,37 @@
 import CryptoData from '../model/Cripto.js'
 import { CovalentApi } from '../api/covalentApi.js'
+import { coinsData } from '../helpers/coinsData.js'
+import { cryptoDataInstance } from '../helpers/CryptoDataInstace.js'
 
 export const getCripto = async (req, res) => {
   try {
     const requestData = req.body
-    let contractName = ''
-    let ContactAdress = ''
-    if (requestData.cripto === 'eth-mainnet') {
-      contractName = 'Ether'
-      ContactAdress = '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee'
-    }
-    if (requestData.cripto === 'matic-mainnet') {
-      contractName = 'Matic Token'
-      ContactAdress = '0x7D1AfA7B718fb893dB30A3aBc0Cfc608AaCfeBB0'
-    }
-    const existingCryptoData = await CryptoData.findOne({ contractName: `${contractName}`, quoteCurrency: `${requestData.quoteCurrency}` })
-    if (existingCryptoData) {
-      const maxDateStorage = existingCryptoData.prices[0].date
-      const minDateStorage = existingCryptoData.prices[existingCryptoData.prices.length - 1].date
-      if (requestData.dateFrom > minDateStorage && requestData.dateTo < maxDateStorage) {
-        res.json(existingCryptoData)
+    const criptoData = coinsData[requestData.cripto]
+    const existCryptoData = await CryptoData.findOne({ contractName: criptoData.contractName, quoteCurrency: requestData.quoteCurrency })
+    if (existCryptoData) {
+      const maxDateStorage = new Date(existCryptoData.prices[0].date)
+      const minDateStorage = new Date(existCryptoData.prices[existCryptoData.prices.length - 1].date)
+      const requestdateFrom = new Date(requestData.dateFrom)
+      const requestDataTo = new Date(requestData.dateTo)
+      if (requestdateFrom >= minDateStorage && requestDataTo <= maxDateStorage) {
+        return res.json(existCryptoData)
       } else {
-        const response = await CovalentApi.get(`/pricing/historical_by_addresses_v2/${requestData.cripto}/${requestData.quoteCurrency}/${ContactAdress}/?from=${requestData.dateFrom}&to=${requestData.dateTo}`, { headers: { Authorization: `${process.env.API_KEY}` } })
-        const cryptoData = response.data
-        const newCryptoData = new CryptoData({
-          contractName: cryptoData.data[0].contract_name,
-          logoUrl: cryptoData.data[0].logo_url,
-          quoteCurrency: cryptoData.data[0].quote_currency,
-          prices: cryptoData.data[0].prices.map(price => ({
-            price: price.price,
-            date: price.date
-          }))
-        })
-        const newPrices = cryptoData.data[0].prices.map(price => ({
+        const response = await CovalentApi.get(`/pricing/historical_by_addresses_v2/${requestData.cripto}/${requestData.quoteCurrency}/${criptoData.ContactAdress}/?from=${requestData.dateFrom}&to=${requestData.dateTo}`, { headers: { Authorization: `${process.env.API_KEY}` } })
+        const newCryptoData = cryptoDataInstance(response.data.data[0])
+        const newPrices = response.data.data[0].prices.map(price => ({
           price: price.price,
           date: price.date
         }))
         try {
-          await CryptoData.findByIdAndUpdate(existingCryptoData._id, { $set: { prices: newPrices } }, { new: true })
+          await CryptoData.findByIdAndUpdate(existCryptoData._id, { $set: { prices: newPrices } }, { new: true })
         } catch (error) {
           return res.status(500).json({ message: 'problema al actualizar los datos' })
         }
         res.json(newCryptoData)
       }
     } else {
-      const response = await CovalentApi.get(`/pricing/historical_by_addresses_v2/${requestData.cripto}/${requestData.quoteCurrency}/${ContactAdress}/?from=${requestData.dateFrom}&to=${requestData.dateTo}`, { headers: { Authorization: `${process.env.API_KEY}` } })
-      const cryptoData = response.data
-      const newCryptoData = new CryptoData({
-        contractName: cryptoData.data[0].contract_name,
-        logoUrl: cryptoData.data[0].logo_url,
-        quoteCurrency: cryptoData.data[0].quote_currency,
-        prices: cryptoData.data[0].prices.map(price => ({
-          price: price.price,
-          date: price.date
-        }))
-      })
+      const response = await CovalentApi.get(`/pricing/historical_by_addresses_v2/${requestData.cripto}/${requestData.quoteCurrency}/${criptoData.ContactAdress}/?from=${requestData.dateFrom}&to=${requestData.dateTo}`, { headers: { Authorization: `${process.env.API_KEY}` } })
+      const newCryptoData = cryptoDataInstance(response.data.data[0])
       await newCryptoData.save()
       res.json(newCryptoData)
     }
@@ -63,6 +40,7 @@ export const getCripto = async (req, res) => {
     res.status(500).json({ message: 'problema al guardar los datos' })
   }
 }
+
 export const getInfoCripto = async (req, res) => {
   const cripto = req.params.cripto
   const quoteCurrency = req.params.quoteCurrency
