@@ -1,7 +1,7 @@
 import CryptoData from '../model/Cripto.js'
 import { CovalentApi } from '../api/covalentApi.js'
 import { coinsData } from '../helpers/coinsData.js'
-import { cryptoDataInstance } from '../helpers/CryptoDataInstace.js'
+import { cryptoDataInstance } from '../helpers/cryptoDataInstace.js'
 
 export const getCripto = async (req, res) => {
   try {
