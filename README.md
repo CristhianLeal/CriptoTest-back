@@ -50,7 +50,7 @@ npm install
 ```
 ### Additional Information and clarifications
 
-* In order to deploy the project, it is necessary to complete the .env file in the way it is in the .env.development example
+* In order to deploy the project, it is necessary to complete the .env file in the way it is in the .env.example example
 
 * For the correct functioning of the project, the Frontend and the Backend are necessary
 
@@ -59,7 +59,6 @@ npm install
 
 | Script         | Descripción                                         |
 | -------------- | --------------------------------------------------- |
-| npm test       |  runs unit tests                                    |
 | npm run lint   | Checks for style errors                             |
 | npm run dev    | Start the server in development mode                |
 | npm start      | Start the server in production mode                 |  
